@@ -2,8 +2,10 @@ package com.example.SpringBoot.with.JWT.service;
 
 import com.example.SpringBoot.with.JWT.dto.AuthResponseDTO;
 import com.example.SpringBoot.with.JWT.dto.LoginRequestDTO;
+import com.example.SpringBoot.with.JWT.dto.RefreshTokenResponseDTO;
 import com.example.SpringBoot.with.JWT.dto.RegisterRequestDTO;
 import com.example.SpringBoot.with.JWT.entity.ERole;
+import com.example.SpringBoot.with.JWT.entity.RefreshToken;
 import com.example.SpringBoot.with.JWT.entity.Role;
 import com.example.SpringBoot.with.JWT.entity.User;
 import com.example.SpringBoot.with.JWT.repository.RoleRepository;
@@ -33,6 +35,7 @@ public class AuthService {
     private final PasswordEncorder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     // Register a new user or admin
 
@@ -93,13 +96,30 @@ public class AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
+        // Create refresh token
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+
         return AuthResponseDTO.builder()
                 .token(jwt)
+                .refreshToken(refreshToken.getToken())
                 .id(userDetails.getId())
                 .username(userDetails.getUsername())
                 .email(userDetails.getEmail())
                 .roles(roles)
                 .build();
+    }
+
+    // Refresh token
+
+    public RefreshTokenResponseDTO refreshToken(String refreshToken) {
+        return refreshTokenService.findByToken(refreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtil.generateTokenFromUsername(user.getUsername());
+                    return new RefreshTokenResponseDTO(token, refreshToken, "Bearer");
+                })
+                .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 
     // Get admin role

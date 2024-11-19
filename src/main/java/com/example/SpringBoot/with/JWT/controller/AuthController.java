@@ -1,9 +1,8 @@
 package com.example.SpringBoot.with.JWT.controller;
 
-import com.example.SpringBoot.with.JWT.dto.AuthResponseDTO;
-import com.example.SpringBoot.with.JWT.dto.LoginRequestDTO;
-import com.example.SpringBoot.with.JWT.dto.RegisterRequestDTO;
+import com.example.SpringBoot.with.JWT.dto.*;
 import com.example.SpringBoot.with.JWT.service.AuthService;
+import com.example.SpringBoot.with.JWT.service.RefreshTokenService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +17,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final RefreshTokenService refreshTokenService;
 
     // Register a new user
     @PostMapping("/register")
@@ -61,5 +61,27 @@ public class AuthController {
         }
         registerRequest.setAdmin(true);
         return ResponseEntity.ok(authService.register(registerRequest));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequestDTO request) {
+        try {
+            return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponseDTO(
+                            java.time.LocalDateTime.now(),
+                            400,
+                            "Error",
+                            e.getMessage(),
+                            "/api/v1/auth/refresh-token"
+                    ));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser(@RequestParam Long userId) {
+        refreshTokenService.deleteByUserId(userId);
+        return ResponseEntity.ok(Map.of("message", "Log out successful!"));
     }
 }
