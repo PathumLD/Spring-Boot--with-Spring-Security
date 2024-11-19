@@ -64,14 +64,14 @@ public class AuthService {
         userRepository.save(user);
 
         return login(LoginRequestDTO.builder()
-                .username(registerRequest.getUsername())
+                .email(registerRequest.getEmail())  //.usernameOrEmail(registerRequest.getEmail())
                 .password(registerRequest.getPassword())
                 .build());
     }
 
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -90,4 +90,29 @@ public class AuthService {
                 .roles(roles)
                 .build();
     }
+
+    //username or email
+//    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        loginRequest.getUsernameOrEmail(),
+//                        loginRequest.getPassword())
+//        );
+//
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//        String jwt = jwtUtil.generateToken(authentication);
+//
+//        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+//        List<String> roles = userDetails.getAuthorities().stream()
+//                .map(GrantedAuthority::getAuthority)
+//                .collect(Collectors.toList());
+//
+//        return AuthResponseDTO.builder()
+//                .token(jwt)
+//                .id(userDetails.getId())
+//                .username(userDetails.getUsername())
+//                .email(userDetails.getEmail())
+//                .roles(roles)
+//                .build();
+//    }
 }
