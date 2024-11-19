@@ -34,6 +34,8 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    // Register a new user or admin
+
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO registerRequest) {
         // Check if username exists
@@ -54,13 +56,20 @@ public class AuthService {
         user.setFirstName(registerRequest.getFirstName());
         user.setLastName(registerRequest.getLastName());
 
-        // Set default role
+        // Set User role
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
         roles.add(userRole);
-        user.setRoles(roles);
 
+        // Add Admin role if registering an admin
+        if (registerRequest.isAdmin()) {
+            Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Error: Admin Role not found."));
+            roles.add(adminRole);
+        }
+
+        user.setRoles(roles);
         userRepository.save(user);
 
         return login(LoginRequestDTO.builder()
@@ -68,6 +77,8 @@ public class AuthService {
                 .password(registerRequest.getPassword())
                 .build());
     }
+
+    // Login user
 
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -91,7 +102,26 @@ public class AuthService {
                 .build();
     }
 
-    //username or email
+    // Get admin role
+
+    public Role getAdminRole() {
+        return roleRepository.findByName(ERole.ROLE_ADMIN)
+                .orElseThrow(() -> new RuntimeException("Error: Admin Role not found. Please ensure database is properly initialized."));
+    }
+
+    // Check if admin exists
+
+    public boolean existsAdmin() {
+        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                .orElseThrow(() -> new RuntimeException("Error: Admin Role not found."));
+        return userRepository.existsByRolesContaining(adminRole);
+    }
+
+
+
+
+    //username or email login
+
 //    public AuthResponseDTO login(LoginRequestDTO loginRequest) {
 //        Authentication authentication = authenticationManager.authenticate(
 //                new UsernamePasswordAuthenticationToken(

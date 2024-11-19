@@ -20,4 +20,10 @@ public class AuthResponseDTO {
     private String username;
     private String email;
     private List<String> roles;
+    private String message;
+
+    // Add a constructor for error messages
+    public AuthResponseDTO(String message) {
+        this.message = message;
+    }
 }

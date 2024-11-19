@@ -1,5 +1,6 @@
 package com.example.SpringBoot.with.JWT.repository;
 
+import com.example.SpringBoot.with.JWT.entity.Role;
 import com.example.SpringBoot.with.JWT.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,6 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Add method to find user by email
     Optional<User> findByEmail(String email);
+
+    // Check if user has a role
+    boolean existsByRolesContaining(Role role);
 
     // Find user by username or email
 //    Optional<User> findByUsernameOrEmail(String username, String email);

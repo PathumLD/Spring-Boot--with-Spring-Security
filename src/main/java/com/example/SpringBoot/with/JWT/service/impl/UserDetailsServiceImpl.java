@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
+    //using username
+
 //    @Override
 //    @Transactional
 //    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -22,6 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 //
 //        return UserDetailsImpl.build(user);
 //    }
+
+    //using email
 
     @Override
     @Transactional

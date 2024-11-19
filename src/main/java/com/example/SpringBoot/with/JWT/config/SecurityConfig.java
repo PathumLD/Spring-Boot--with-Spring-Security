@@ -13,10 +13,15 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    // This is required to make AuthenticationManager available as a bean
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
+    // This is required to configure the security filter chain
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -29,16 +34,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
-
-
-
-//    @Bean
-//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//        http.csrf().disable()
-//                .authorizeHttpRequests()
-//                .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-//                .anyRequest().authenticated();
-//
-//        return http.build();
-//    }
 
